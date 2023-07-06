@@ -15,7 +15,10 @@ class TestApp(unittest.TestCase):
             ['Ancash', 'Asuncion', 'Chacas', '46615862', 'Robert Redmond', '1'],
             ['Ancash', 'Asuncion', 'Chacas', '62329211', 'Aundrea Grace', '0']
         ]
-        self.assertEqual(self.app.leerDatos('test.csv'), expected_data)
+        # read test.csv of local directory and convert it to FileStorage object
+        with open('test.csv', 'rb') as f:
+            read_data = self.app.leerDatos(f)
+            self.assertEqual(read_data, expected_data)
 
     def test_contarVotos(self):
         expected_votos = {
@@ -37,7 +40,7 @@ class TestApp(unittest.TestCase):
         self.assertEqual(total, expected_total)
 
     def test_calcularGanador(self):
-        expected_ganador = ['Aundrea Grace']
+        expected_ganador = [{'name': 'Aundrea Grace', 'votes': 5}]
         votos = {
             'Eddie Hinesley': 1,
             'Paula Daigle': 1,

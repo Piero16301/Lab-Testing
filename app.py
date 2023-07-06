@@ -1,21 +1,16 @@
 import csv
+import flask
 
+app = flask.Flask(__name__)
 
-# El programa deberá calcular el ganador de votos validos considerando que los siguientes datos son proporcionados:
-# region,provincia,distrito,dni,candidato,esvalido Si hay un candidato con >50% de votos válidos retornar un array
-# con un string con el nombre del ganador Si no hay un candidato que cumpla la condicion anterior, retornar un array
-# con los dos candidatos que pasan a segunda vuelta Si ambos empatan con 50% de los votos se retorna el que apareció
-# primero en el archivo el DNI debe ser válido (8 digitos)
 
 class CalculaGanador:
 
     def leerDatos(self, csv_file):
+        csv_file_data = csv_file.read().decode("utf-8").splitlines()[1:]
         data = []
-        with open(csv_file, 'r') as csvfile:
-            next(csvfile)
-            datareader = csv.reader(csvfile)
-            for fila in datareader:
-                data.append(fila)
+        for row in csv_file_data:
+            data.append(row.split(','))
         return data
 
     def contarVotos(self, data):
@@ -28,27 +23,34 @@ class CalculaGanador:
         totalVotos = sum(votosxcandidato.values())
         return votosxcandidato, totalVotos
 
+    # return candidate name and votes
     def calcularGanador(self, votosxcandidato, totalVotos):
         votosxcandidato = {k: v for k, v in sorted(votosxcandidato.items(), key=lambda item: item[1], reverse=True)}
-        print(votosxcandidato)
 
         if votosxcandidato[list(votosxcandidato.keys())[0]] > totalVotos / 2:
-            return [list(votosxcandidato.keys())[0]]
+            return [{"name": list(votosxcandidato.keys())[0], "votes": votosxcandidato[list(votosxcandidato.keys())[0]]}]
 
-        if votosxcandidato[list(votosxcandidato.keys())[0]] == totalVotos / 2 and votosxcandidato[list(votosxcandidato.keys())[1]] == totalVotos / 2:
-            return [list(votosxcandidato.keys())[0]]
+        if votosxcandidato[list(votosxcandidato.keys())[0]] == totalVotos / 2 and votosxcandidato[
+            list(votosxcandidato.keys())[1]] == totalVotos / 2:
+            return [{"name": list(votosxcandidato.keys())[0], "votes": votosxcandidato[list(votosxcandidato.keys())[0]]}]
 
-        return [list(votosxcandidato.keys())[0], list(votosxcandidato.keys())[1]]
+        return [{"name": list(votosxcandidato.keys())[0], "votes": votosxcandidato[list(votosxcandidato.keys())[0]]},
+                {"name": list(votosxcandidato.keys())[1], "votes": votosxcandidato[list(votosxcandidato.keys())[1]]}]
 
 
-c = CalculaGanador()
-datatest = [
-    ['Áncash', 'Asunción', 'Acochaca', '40810062', 'Eddie Hinesley', '0'],
-    ['Áncash', 'Asunción', 'Acochaca', '57533597', 'Eddie Hinesley', '1'],
-    ['Áncash', 'Asunción', 'Acochaca', '86777322', 'Aundrea Grace', '1'],
-    ['Áncash', 'Asunción', 'Acochaca', '23017965', 'Aundrea Grace', '1']
-]
+@app.route('/')
+def index():
+    return 'Hello World!'
 
-data = c.leerDatos('0204.csv')
-votos, total = c.contarVotos(data)
-print('Ganador(es): ', c.calcularGanador(votos, total))
+
+@app.route('/ganador', methods=['POST'])
+def ganador():
+    csv_file = flask.request.files['results']
+    c = CalculaGanador()
+    data = c.leerDatos(csv_file)
+    votos, total = c.contarVotos(data)
+    return flask.jsonify(c.calcularGanador(votos, total))
+
+
+if __name__ == '__main__':
+    app.run(debug=False)
