@@ -1,4 +1,3 @@
-import csv
 import flask
 
 app = flask.Flask(__name__)
@@ -16,7 +15,7 @@ class CalculaGanador:
     def contarVotos(self, data):
         votosxcandidato = {}
         for fila in data:
-            if not fila[4] in votosxcandidato:
+            if fila[4] not in votosxcandidato:
                 votosxcandidato[fila[4]] = 0
             if fila[5] == '1':
                 votosxcandidato[fila[4]] = votosxcandidato[fila[4]] + 1
@@ -25,17 +24,24 @@ class CalculaGanador:
 
     # return candidate name and votes
     def calcularGanador(self, votosxcandidato, totalVotos):
-        votosxcandidato = {k: v for k, v in sorted(votosxcandidato.items(), key=lambda item: item[1], reverse=True)}
+        votosxcandidato = {k: v for k, v in sorted(votosxcandidato.items(), key=lambda
+            item: item[1], reverse=True)}
 
         if votosxcandidato[list(votosxcandidato.keys())[0]] > totalVotos / 2:
-            return [{"name": list(votosxcandidato.keys())[0], "votes": votosxcandidato[list(votosxcandidato.keys())[0]]}]
+            return [
+                {"name": list(votosxcandidato.keys())[0], "votes": votosxcandidato[
+                    list(votosxcandidato.keys())[0]]}]
 
-        if votosxcandidato[list(votosxcandidato.keys())[0]] == totalVotos / 2 and votosxcandidato[
-            list(votosxcandidato.keys())[1]] == totalVotos / 2:
-            return [{"name": list(votosxcandidato.keys())[0], "votes": votosxcandidato[list(votosxcandidato.keys())[0]]}]
+        if votosxcandidato[list(votosxcandidato.keys())[0]] == totalVotos / 2 and \
+                votosxcandidato[list(votosxcandidato.keys())[1]] == totalVotos / 2:
+            return [
+                {"name": list(votosxcandidato.keys())[0], "votes": votosxcandidato[
+                    list(votosxcandidato.keys())[0]]}]
 
-        return [{"name": list(votosxcandidato.keys())[0], "votes": votosxcandidato[list(votosxcandidato.keys())[0]]},
-                {"name": list(votosxcandidato.keys())[1], "votes": votosxcandidato[list(votosxcandidato.keys())[1]]}]
+        return [{"name": list(votosxcandidato.keys())[0], "votes": votosxcandidato[
+            list(votosxcandidato.keys())[0]]},
+                {"name": list(votosxcandidato.keys())[1], "votes": votosxcandidato[
+                    list(votosxcandidato.keys())[1]]}]
 
 
 @app.route('/')
